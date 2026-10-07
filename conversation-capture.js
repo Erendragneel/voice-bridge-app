@@ -40,7 +40,7 @@ class ConversationCapture extends AudioWorkletProcessor {
       this.port.postMessage({ type: 'speech' });
     } else { this.frames.push(frame); this.count += frame.length; }
     if (speech) { this.voiced += frame.length; this.quiet = 0; } else this.quiet += frame.length;
-    if (this.quiet >= sampleRate * 0.8 || this.count >= sampleRate * 12) this.finish();
+    if (this.quiet >= sampleRate * 0.45 || this.count >= sampleRate * 12) this.finish();
     return true;
   }
 }
