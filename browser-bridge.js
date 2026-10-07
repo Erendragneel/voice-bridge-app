@@ -3,7 +3,7 @@ const emit=(name,detail)=>window.dispatchEvent(new CustomEvent(name,{detail}));
 const event=(id,type,extra={})=>emit('voice-bridge',{id,type,...extra});
 const modelEvent=(id,type,text='',extra={})=>emit('voice-bridge-model',{id,type,text,...extra});
 const Recognition=window.SpeechRecognition||window.webkitSpeechRecognition;
-let audioContext;
+let audioContext,japaneseMode='fast',japaneseFallback=false,speechTimer,emptyJapanese=0;
 let capture,autoMode=false,detectSequence=0,detectPending=null;
 let worker,source,target,recognition,utterance,attempt=0,activeSession=-1,activeRequest=-1;
 function engine(){
@@ -15,34 +15,36 @@ function engine(){
  return worker;
 }
 function closeTranslation(){if(audioContext){void audioContext.close().catch(()=>{});audioContext=null;}worker?.terminate();worker=null;activeRequest=-1;}
-function stopListening(){attempt++;clearTimeout(detectPending?.timer);detectPending=null;if(capture){capture.node.port.postMessage({enabled:false});capture.stream.getTracks().forEach(t=>t.stop());capture.node.disconnect();capture.input.disconnect();capture=null;}if(recognition){recognition.onend=null;recognition.abort();recognition=null;}}
+function stopListening(){attempt++;clearTimeout(speechTimer);clearTimeout(detectPending?.timer);detectPending=null;if(capture){capture.node.port.postMessage({enabled:false});capture.stream.getTracks().forEach(t=>t.stop());capture.node.disconnect();capture.input.disconnect();capture=null;}if(recognition){recognition.onend=null;recognition.abort();recognition=null;}}
 function stopSpeech(){utterance=null;window.speechSynthesis?.cancel();}
 const bridge={
- browser:true,speechAvailable:!!Recognition,autoAvailable:!!navigator.mediaDevices?.getUserMedia&&!!window.AudioWorkletNode,setAuto(value){autoMode=value;if(value&&bridge.autoAvailable){try{audioContext||=new (window.AudioContext||window.webkitAudioContext)();void audioContext.resume().catch(()=>{});}catch{}}},
+ get japaneseLocal(){return japaneseMode==='local'||japaneseFallback||!Recognition;},setJapaneseMode(value){japaneseMode=value==='local'?'local':'fast';japaneseFallback=false;emptyJapanese=0;},browser:true,speechAvailable:!!Recognition,autoAvailable:!!navigator.mediaDevices?.getUserMedia&&!!window.AudioWorkletNode,setAuto(value){autoMode=value;if(bridge.autoAvailable){try{audioContext||=new (window.AudioContext||window.webkitAudioContext)();void audioContext.resume().catch(()=>{});}catch{}}},
  prepare(from,to,id,session){source=from;target=to;activeSession=session;activeRequest=id;engine().postMessage({id,action:'prepare',source:from,target:to,auto:autoMode});void navigator.storage?.persist?.().catch(()=>{});},
  translate(text,from,id){activeRequest=id;engine().postMessage({id,action:'translate',text,source:from,target:from===source?target:source});},
  closeTranslation,
  start(language,id){
   stopListening();activeSession=id;
-  if(language==='auto'||language==='ja-JP'){void startAuto(id,attempt,language==='ja-JP'?'ja':undefined);return;}
+  if(language==='auto'||(language==='ja-JP'&&bridge.japaneseLocal)){void startAuto(id,attempt,language==='ja-JP'?'ja':undefined);return;}
   if(!Recognition){event(id,'error',{message:'Speech is unavailable. Open this app in Chrome or use Type a phrase.'});return;}
   const rec=new Recognition(),token=attempt;recognition=rec;
   rec.lang=language;rec.continuous=false;rec.interimResults=true;
   let words='',failed=false;
   const valid=()=>token===attempt&&id===activeSession;
-  rec.onstart=()=>{if(valid())event(id,'ready');};
+  const fallback=()=>{if(!valid()||language!=='ja-JP'||!bridge.autoAvailable)return false;japaneseFallback=true;stopListening();event(id,'notice',{message:'Japanese browser speech unavailable. On-device speech is taking over; repeat your phrase when Listening appears.'});void startAuto(id,attempt,'ja');return true;};
+  speechTimer=setTimeout(()=>{if(!fallback()&&valid())event(id,'error',{message:'Speech did not open. Check microphone permission or type your phrase.'});},12000);
+  rec.onstart=()=>{if(valid()){clearTimeout(speechTimer);event(id,'ready');}};
   rec.onspeechstart=()=>{if(valid())event(id,'speech');};
-  rec.onspeechend=()=>{if(valid())event(id,'recognizing');};
+  rec.onspeechend=()=>{if(valid()){event(id,'recognizing');if(language==='ja-JP')speechTimer=setTimeout(()=>fallback(),5000);}};
   rec.onresult=e=>{if(!valid())return;words=Array.from(e.results,r=>r[0].transcript).join(' ').trim();event(id,'partial',{text:words});};
   rec.onerror=e=>{
-   if(!valid())return;if(e.error==='no-speech')return;failed=true;
+   if(!valid())return;if(e.error==='no-speech')return;if(language==='ja-JP'&&!['not-allowed','audio-capture','aborted'].includes(e.error)&&fallback())return;failed=true;clearTimeout(speechTimer);
    event(id,'error',{message:e.error==='not-allowed'||e.error==='service-not-allowed'?'Allow microphone permission in Chrome settings, or type a phrase below.':e.error==='audio-capture'?'No microphone is available. Type a phrase below.':'Speech could not connect. Check your internet connection or type a phrase below.'});
   };
-  rec.onend=()=>{if(!valid())return;recognition=null;if(!failed)event(id,words?'result':'empty',words?{text:words}:{});};
-  try{rec.start();}catch{event(id,'error',{message:'Could not open the microphone. Check permission or type a phrase below.'});}
+  rec.onend=()=>{if(!valid())return;clearTimeout(speechTimer);if(language==='ja-JP'&&!failed&&!words&&++emptyJapanese>=2&&fallback())return;if(words)emptyJapanese=0;recognition=null;if(!failed)event(id,words?'result':'empty',words?{text:words}:{});};
+  try{rec.start();}catch{if(fallback())return;clearTimeout(speechTimer);event(id,'error',{message:'Could not open the microphone. Check permission or type a phrase below.'});}
  },
  stopListening,finish(){if(capture)capture.node.port.postMessage({finish:true});else recognition?.stop();},
- cancel(){activeSession=-1;stopListening();stopSpeech();closeTranslation();},
+ cancel(){japaneseFallback=false;emptyJapanese=0;activeSession=-1;stopListening();stopSpeech();closeTranslation();},
  stopSpeech,
  read(text,language,id){
   stopListening();stopSpeech();

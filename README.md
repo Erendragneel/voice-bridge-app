@@ -20,6 +20,8 @@ GitHub Pages publishes the main branch from the repository root. All app URLs, t
 
 In the GitHub Pages app, select **Auto** for English/Japanese, then **Start conversation**. Each phrase is identified independently, so either person can speak next. Auto recognizes microphone audio locally using an additional Whisper speech pack downloaded on first use. Wait for Listening before the next phrase. Very short phrases may be misidentified; manual speaker buttons remain available. This feature is in the website/home-screen app; the v1.0.1 Android APK retains manual speaker selection.
 
-Speaker buttons remain clickable during preparation, translation, and playback. Selecting a different speaker during playback stops that playback and opens the chosen microphone. Japanese recognition runs on-device with Whisper. Updated app windows reload automatically once to avoid mixing cached scripts from different versions.
+Speaker buttons remain clickable during preparation, translation, and playback. Selecting a different speaker during playback stops that playback and opens the chosen microphone. Japanese speech offers Faster browser service or On-device Whisper recognition. Updated app windows reload automatically once to avoid mixing cached scripts from different versions.
 
 Performance update: compatible phones use GPU translation with CPU fallback; short phrases use one pass; repeated translations are cached for the conversation. Speech pauses and microphone restart delays are shorter. Subsecond completion is not guaranteed and depends on phone/model speed.
+
+Japanese speech defaults to **Faster · browser service**. If recognition fails, on-device speech takes over; repeat your phrase when Listening appears. Select **On-device · private** to keep Japanese audio local. Faster mode needs internet and may process audio through the browser provider. Auto remains on-device.

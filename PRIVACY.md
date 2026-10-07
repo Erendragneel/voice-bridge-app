@@ -20,4 +20,4 @@ Microphone capture and voice playback stop when the conversation stops or the ap
 
 Auto English/Japanese speech recognition uses a downloaded Whisper model on this device. Auto microphone audio is not sent to a speech provider. Manual speaker mode retains the browser speech service described above.
 
-The GitHub web app also recognizes manual Japanese speech locally through Whisper. Manual English and other language buttons use browser speech recognition.
+The Japanese speaker button defaults to Faster browser speech, which may send audio to the browser speech provider. Select On-device Japanese for local recognition. If Faster Japanese fails, the app switches to local Whisper recognition and asks you to repeat the phrase. Auto remains local. Manual English and other language buttons use browser speech recognition.
