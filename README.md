@@ -22,6 +22,8 @@ In the GitHub Pages app, select **Auto** for English/Japanese, then **Start conv
 
 Speaker buttons remain clickable during preparation, translation, and playback. Selecting a different speaker during playback stops that playback and opens the chosen microphone. Japanese speech offers Faster browser service or On-device Whisper recognition. Updated app windows reload automatically once to avoid mixing cached scripts from different versions.
 
-Performance update: compatible phones use GPU translation with CPU fallback; short phrases use one pass; repeated translations are cached for the conversation. Speech pauses and microphone restart delays are shorter. Subsecond completion is not guaranteed and depends on phone/model speed.
+Performance update: translation uses the stable CPU path; short phrases use one pass; repeated translations are cached for the conversation. Speech pauses and microphone restart delays are shorter. Subsecond completion is not guaranteed and depends on phone/model speed.
 
 Japanese speech defaults to **Faster · browser service**. If recognition fails, on-device speech takes over; repeat your phrase when Listening appears. Select **On-device · private** to keep Japanese audio local. Faster mode needs internet and may process audio through the browser provider. Auto remains on-device.
+
+GPU translation is disabled following repeated-word corruption. Broken repetitive output is retried using a fresh CPU model, and persistent failure is rejected before playback and caching.
