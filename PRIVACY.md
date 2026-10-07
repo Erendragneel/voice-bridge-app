@@ -17,3 +17,5 @@ Microphone audio is handled by the Android speech recognition service selected o
 Native Android translation uses Google ML Kit on-device. According to [Google's terms and privacy disclosure](https://developers.google.com/ml-kit/terms), translation input and output are not sent to Google. The SDK downloads language models and sends performance and API utilization metrics to Google. These communications follow [Google's privacy policy](https://policies.google.com/privacy). Downloaded models remain in app storage until app data is cleared or the app is uninstalled.
 
 Microphone capture and voice playback stop when the conversation stops or the app leaves the foreground. Android backup is disabled. The app explicitly requests microphone and internet permissions; library dependencies may add network-state permissions used for downloads.
+
+Auto English/Japanese speech recognition uses a downloaded Whisper model on this device. Auto microphone audio is not sent to a speech provider. Manual speaker mode retains the browser speech service described above.

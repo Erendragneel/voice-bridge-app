@@ -12,8 +12,8 @@ async function load(id,model){
   runtime.env.backends.onnx.wasm.wasmPaths=new URL('./vendor/',import.meta.url).href;
  }
  if(!models.has(model)){
-  send(id,'progress',{message:model.includes('nllb')?'Downloading multilingual pack (about 900 MB on first use) · keep Wi-Fi connected…':'Downloading English/Japanese pack (about 150 MB per direction) · keep Wi-Fi connected…'});
-  const pipeline=await runtime.pipeline('translation',model,{
+  send(id,'progress',{message:model.includes('whisper')?'Downloading Auto speech pack · keep Wi-Fi connected…':model.includes('nllb')?'Downloading multilingual pack (about 900 MB on first use) · keep Wi-Fi connected…':'Downloading English/Japanese pack (about 150 MB per direction) · keep Wi-Fi connected…'});
+  const pipeline=await runtime.pipeline(model.includes('whisper')?'automatic-speech-recognition':'translation',model,{
    dtype:'q8',device:'wasm',
    progress_callback:p=>{if(p.status==='progress')send(id,'progress',{message:'Downloading '+p.file+'…',progress:Math.round(p.progress)});else if(p.status==='done')send(id,'progress',{message:'Preparing language pack…'});}
   });
@@ -27,10 +27,19 @@ function split(text){
  for(const sentence of sentences){let rest=sentence.trim();while(rest.length>180){let at=rest.lastIndexOf(' ',180);if(at<60)at=180;parts.push(rest.slice(0,at).trim());rest=rest.slice(at).trim();}if(rest)parts.push(rest);}
  return parts;
 }
-async function run({id,action,source,target,text}){
+async function run({id,action,source,target,text,audio,auto}){
  try{
+  if(action==='detect'){
+   const r=await load(id,'Xenova/whisper-base');send(id,'progress',{message:'Detecting English or Japanese…'});
+   const features=await r.processor(audio);
+   const detected=await r.model.generate({inputs:features.input_features,decoder_input_ids:[r.model.generation_config.decoder_start_token_id],max_new_tokens:1,suppress_tokens:[],begin_suppress_tokens:[],forced_decoder_ids:null});
+   const language=r.tokenizer.decode(detected[0].tolist(),{skip_special_tokens:false}).match(/<\|([a-z]{2})\|>/)?.[1];
+   if(!['en','ja'].includes(language)){send(id,'recognized',{original:'',language});return;}
+   const out=await r.model.generate({inputs:features.input_features,language:language==='ja'?'japanese':'english',task:'transcribe',return_timestamps:false,max_new_tokens:160});
+   send(id,'recognized',{original:r.tokenizer.decode(out[0].tolist(),{skip_special_tokens:true}).trim(),language});return;
+  }
   if(!codes[source]||!codes[target])throw Error('Choose a supported language.');
-  if(action==='prepare'){for(const model of new Set([select(source,target),select(target,source)]))await load(id,model);send(id,'result');return;}
+  if(action==='prepare'){for(const model of new Set([select(source,target),select(target,source)]))await load(id,model);if(auto)await load(id,'Xenova/whisper-base');send(id,'result');return;}
   if(action!=='translate'||!text?.trim())throw Error('Type or speak a phrase first.');
   if(source===target){send(id,'result',{translation:text.trim()});return;}
   const model=select(source,target),translator=await load(id,model),parts=split(text),result=[];

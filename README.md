@@ -15,3 +15,7 @@ This repository contains the public installation website. Its signed Android ins
 ## Publishing
 
 GitHub Pages publishes the main branch from the repository root. All app URLs, the manifest, workers, icons, and offline files use relative paths scoped to this app. Updated shell content changes the service-worker cache version. This distribution needs no backend, paid API key, or npm installation.
+
+## Auto conversation mode
+
+In the GitHub Pages app, select **Auto** for English/Japanese, then **Start conversation**. Each phrase is identified independently, so either person can speak next. Auto recognizes microphone audio locally using an additional Whisper speech pack downloaded on first use. Wait for Listening before the next phrase. Very short phrases may be misidentified; manual speaker buttons remain available. This feature is in the website/home-screen app; the v1.0.1 Android APK retains manual speaker selection.

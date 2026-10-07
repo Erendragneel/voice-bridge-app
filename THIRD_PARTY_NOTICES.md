@@ -14,3 +14,5 @@ Native Android translations are powered by Google ML Kit. This app is not affili
 - Other language pairs use [Xenova/nllb-200-distilled-600M](https://huggingface.co/Xenova/nllb-200-distilled-600M), an ONNX export of Meta’s NLLB-200 model, licensed under [Creative Commons Attribution-NonCommercial 4.0 International](https://creativecommons.org/licenses/by-nc/4.0/).
 
 Translation models are downloaded separately on first use and remain governed by their respective licenses. Browser translations use these local models, rather than Google ML Kit.
+
+Auto speech: Xenova/whisper-base ONNX export of OpenAI Whisper base, Apache 2.0. https://huggingface.co/Xenova/whisper-base
