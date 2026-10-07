@@ -33,6 +33,7 @@
       </div>
       <label class="hint">Japanese speech <select id="japanese-speech" aria-label="Japanese speech recognition"><option value="fast">Faster · browser service</option><option value="local">On-device · private</option></select></label>
       <p class="hint">Faster Japanese needs internet and may send audio to your browser’s speech provider. If it fails, on-device speech takes over; repeat your phrase. Auto uses on-device detection.</p>
+      <p id="speech-details" class="hint" role="status"></p><button id="retry-japanese" class="secondary" type="button" hidden>Retry faster Japanese</button>
       <div id="status" role="status">Ready · select Auto, English, or 日本語</div>
       <div class="meter"><meter id="level" min="0" max="10" value="0" aria-label="Microphone sound level"></meter><span>Microphone level</span></div>
       <div class="exchange" aria-live="polite">

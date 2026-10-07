@@ -30,18 +30,18 @@ const bridge={
   rec.lang=language;rec.continuous=false;rec.interimResults=true;
   let words='',failed=false;
   const valid=()=>token===attempt&&id===activeSession;
-  const fallback=()=>{if(!valid()||language!=='ja-JP'||!bridge.autoAvailable)return false;japaneseFallback=true;stopListening();event(id,'notice',{message:'Japanese browser speech unavailable. On-device speech is taking over; repeat your phrase when Listening appears.'});void startAuto(id,attempt,'ja');return true;};
+  const fallback=(reason='recognition did not respond')=>{if(!valid()||language!=='ja-JP'||!bridge.autoAvailable)return false;japaneseFallback=true;stopListening();event(id,'notice',{message:'Faster Japanese failed ('+reason+'). On-device speech is taking over; repeat your phrase when Listening appears.',fallback:true});void startAuto(id,attempt,'ja');return true;};
   speechTimer=setTimeout(()=>{if(!fallback()&&valid())event(id,'error',{message:'Speech did not open. Check microphone permission or type your phrase.'});},12000);
   rec.onstart=()=>{if(valid()){clearTimeout(speechTimer);event(id,'ready');}};
   rec.onspeechstart=()=>{if(valid())event(id,'speech');};
   rec.onspeechend=()=>{if(valid()){event(id,'recognizing');if(language==='ja-JP')speechTimer=setTimeout(()=>fallback(),5000);}};
   rec.onresult=e=>{if(!valid())return;words=Array.from(e.results,r=>r[0].transcript).join(' ').trim();event(id,'partial',{text:words});};
   rec.onerror=e=>{
-   if(!valid())return;if(e.error==='no-speech')return;if(language==='ja-JP'&&!['not-allowed','audio-capture','aborted'].includes(e.error)&&fallback())return;failed=true;clearTimeout(speechTimer);
+   if(!valid())return;if(e.error==='no-speech')return;if(language==='ja-JP'&&!['not-allowed','audio-capture','aborted'].includes(e.error)&&fallback(e.error))return;failed=true;clearTimeout(speechTimer);
    event(id,'error',{message:e.error==='not-allowed'||e.error==='service-not-allowed'?'Allow microphone permission in Chrome settings, or type a phrase below.':e.error==='audio-capture'?'No microphone is available. Type a phrase below.':'Speech could not connect. Check your internet connection or type a phrase below.'});
   };
-  rec.onend=()=>{if(!valid())return;clearTimeout(speechTimer);if(language==='ja-JP'&&!failed&&!words&&++emptyJapanese>=2&&fallback())return;if(words)emptyJapanese=0;recognition=null;if(!failed)event(id,words?'result':'empty',words?{text:words}:{});};
-  try{rec.start();}catch{if(fallback())return;clearTimeout(speechTimer);event(id,'error',{message:'Could not open the microphone. Check permission or type a phrase below.'});}
+  rec.onend=()=>{if(!valid())return;clearTimeout(speechTimer);if(words)emptyJapanese=0;recognition=null;if(!failed)event(id,words?'result':'empty',words?{text:words}:{});};
+  try{rec.start();}catch(error){if(fallback(error.name||'startup error'))return;clearTimeout(speechTimer);event(id,'error',{message:'Could not open the microphone. Check permission or type a phrase below.'});}
  },
  stopListening,finish(){if(capture)capture.node.port.postMessage({finish:true});else recognition?.stop();},
  cancel(){japaneseFallback=false;emptyJapanese=0;activeSession=-1;stopListening();stopSpeech();closeTranslation();},
