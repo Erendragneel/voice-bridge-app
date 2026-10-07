@@ -1,0 +1,16 @@
+name: Validate phone installation
+on: [push, pull_request, workflow_dispatch]
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate browser files
+        run: |
+          for file in app.js engine.js browser-bridge.js translator-worker.js install.js sw.js; do node --check "$file"; done
+          node --input-type=module -e "import fs from 'node:fs'; const m=JSON.parse(fs.readFileSync('manifest.webmanifest')); if(m.id!=='./'||m.scope!=='./'||m.display!=='standalone') throw Error('Unexpected app identity'); for(const icon of m.icons) if(!fs.existsSync(icon.src)) throw Error('Missing app icon');"

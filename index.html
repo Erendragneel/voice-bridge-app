@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#b92042">
+  <meta name="description" content="Translate conversations between English, Japanese, and other languages. Install Voice Bridge on your phone from this secure website.">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <title>Voice Bridge</title>
+  <link rel="canonical" href="https://erendragneel.github.io/voice-bridge-app/">
+  <link rel="icon" type="image/png" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="app.css">
+</head>
+<body>
+  <main>
+    <header>
+      <a class="brand" href="./" aria-label="Voice Bridge home"><span class="logo" aria-hidden="true">⇄</span><strong>Voice Bridge</strong></a>
+      <button id="install-app" class="install-button" type="button">↓ Install App</button>
+    </header>
+    <section class="workspace" aria-label="Conversation translator">
+      <div class="languages">
+        <label>Person 1<select id="first" aria-label="Person 1 language"></select></label>
+        <span aria-hidden="true">⇄</span>
+        <label>Person 2<select id="second" aria-label="Person 2 language"></select></label>
+      </div>
+      <div class="speaker-buttons" aria-label="Who speaks next?">
+        <button id="speaker-first" type="button" aria-pressed="true">English speaker</button>
+        <button id="speaker-second" type="button" aria-pressed="false">日本語で話す</button>
+      </div>
+      <div id="status" role="status">Ready · choose who speaks first</div>
+      <div class="meter"><meter id="level" min="0" max="10" value="0" aria-label="Microphone sound level"></meter><span>Microphone level</span></div>
+      <div class="exchange" aria-live="polite">
+        <article><span id="original-label">ORIGINAL</span><p id="original">Speak or type a phrase. Your words appear here.</p></article>
+        <article class="translated"><span id="translation-label">TRANSLATION</span><p id="translation">Each exchange appears here automatically.</p></article>
+      </div>
+      <div id="progress" hidden><span id="progress-text"></span><progress id="download" max="100" value="0" hidden></progress></div>
+      <p id="error" role="alert" hidden></p>
+      <label class="auto"><input id="auto-read" type="checkbox" checked> Read translations aloud automatically</label>
+      <button id="start" class="primary" type="button">Start conversation</button>
+      <button id="finish" class="secondary" type="button" hidden>Finish this phrase</button>
+      <p class="hint">Replies alternate automatically. Wait for “Listening” before speaking.</p>
+      <details class="typed-entry" open>
+        <summary>Type a phrase</summary>
+        <label for="typed-text">Words from the selected speaker</label>
+        <div class="typed-controls"><textarea id="typed-text" rows="2" maxlength="4000" placeholder="Type what you want to say…"></textarea><button id="translate-text" class="secondary" type="button">Translate text</button></div>
+        <p>Use typing when microphone recognition is unavailable or you prefer a quiet conversation.</p>
+      </details>
+      <details class="privacy-details">
+        <summary>First download &amp; privacy</summary>
+        <p>Translation runs in your browser on this device. First use downloads about 150 MB for each English/Japanese direction, about 300 MB for the pair. Other language pairs use a multilingual pack of about 900 MB. Keep Wi-Fi connected and allow time. Older phones may take longer to translate. No paid API key or subscription is required.</p>
+        <p>Microphone recognition and voice playback depend on your browser and installed languages. Your browser’s speech provider may process microphone audio online. If speech is unavailable, type your phrase instead. Keep the app open during a conversation.</p>
+        <p>The app shell is saved for offline opening. Translation also needs the language models to finish downloading and remain in browser storage. Clearing site data removes downloaded models. Translations may make mistakes.</p>
+        <p>English ↔ Japanese uses FuguMT: <a href="https://huggingface.co/Kadonox/fugumt-en-ja-onnx">English → Japanese</a> and <a href="https://huggingface.co/Kadonox/fugumt-ja-en-onnx">Japanese → English</a>, licensed under <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>. Kadonox provides the ONNX exports of <a href="https://huggingface.co/staka/fugumt-en-ja">staka’s</a> <a href="https://huggingface.co/staka/fugumt-ja-en">FuguMT models</a>, trained on <a href="https://www.kecl.ntt.co.jp/icl/lirg/jparacrawl/">JParaCrawl</a>. Other pairs use <a href="https://huggingface.co/Xenova/nllb-200-distilled-600M">NLLB-200</a>, licensed under <a href="https://creativecommons.org/licenses/by-nc/4.0/">CC BY-NC 4.0</a>. Browser inference uses <a href="https://github.com/huggingface/transformers.js">Transformers.js</a>.</p>
+        <p><a href="privacy.html">Privacy details</a> · <a href="https://github.com/Erendragneel/voice-bridge-app">Source &amp; Android download</a></p>
+      </details>
+      <p id="offline-status" class="offline-status" role="status">Setting up offline opening…</p>
+    </section>
+    <footer>Free on-device translation · English ↔ 日本語 and more</footer>
+  </main>
+  <dialog id="install-dialog" aria-labelledby="install-title">
+    <div class="dialog-heading"><h2 id="install-title">Install Voice Bridge</h2><button id="close-install" class="dialog-close" type="button" aria-label="Close installation instructions">×</button></div>
+    <p>Add Voice Bridge to your home screen. It opens with its own app icon and window.</p>
+    <p id="install-status" role="status"></p>
+    <button id="install-now" class="primary" type="button" hidden>Install Voice Bridge</button>
+    <ol id="install-steps"></ol>
+    <p class="install-note">If you opened this link inside GitHub or a messaging app, use its menu to open the link in your regular browser first.</p>
+    <a href="https://erendragneel.github.io/voice-bridge-app/" target="_blank" rel="noopener">Open official website</a>
+  </dialog>
+  <script type="module">
+    import './browser-bridge.js';
+    await import('./app.js');
+    await import('./install.js');
+  </script>
+</body>
+</html>
