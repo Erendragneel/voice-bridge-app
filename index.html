@@ -31,7 +31,7 @@
         <button id="speaker-first" type="button" aria-pressed="true">English speaker</button>
         <button id="speaker-second" type="button" aria-pressed="false">日本語で話す</button>
       </div>
-      <div id="status" role="status">Ready · choose who speaks first</div>
+      <div id="status" role="status">Ready · select Auto, English, or 日本語</div>
       <div class="meter"><meter id="level" min="0" max="10" value="0" aria-label="Microphone sound level"></meter><span>Microphone level</span></div>
       <div class="exchange" aria-live="polite">
         <article><span id="original-label">ORIGINAL</span><p id="original">Speak or type a phrase. Your words appear here.</p></article>
@@ -42,7 +42,7 @@
       <label class="auto"><input id="auto-read" type="checkbox" checked> Read translations aloud automatically</label>
       <button id="start" class="primary" type="button">Start conversation</button>
       <button id="finish" class="secondary" type="button" hidden>Finish this phrase</button>
-      <p class="hint">Auto detects English or Japanese for each phrase. Either person can speak next. Wait for “Listening” before speaking.</p>
+      <p class="hint">Auto detects each phrase’s language. English and 日本語 stay selected until you change them. Wait for “Listening” before speaking.</p>
       <details class="typed-entry" open>
         <summary>Type a phrase</summary>
         <label for="typed-text">Words from the selected speaker</label>
@@ -52,7 +52,7 @@
       <details class="privacy-details">
         <summary>First download &amp; privacy</summary>
         <p>Translation runs in your browser on this device. First use downloads about 150 MB for each English/Japanese direction, about 300 MB for the pair. Other language pairs use a multilingual pack of about 900 MB. Keep Wi-Fi connected and allow time. Older phones may take longer to translate. No paid API key or subscription is required.</p>
-        <p>Auto downloads an additional Whisper speech pack on first use and recognizes audio on this device. Short phrases can be misidentified; use a manual speaker if needed. <a href="https://huggingface.co/Xenova/whisper-base">Whisper base</a> uses the Apache 2.0 license. Manual microphone recognition and voice playback depend on your browser and installed languages. Your browser’s speech provider may process microphone audio online. If speech is unavailable, type your phrase instead. Keep the app open during a conversation.</p>
+        <p>Auto and the Japanese speaker button download an additional Whisper speech pack on first use and recognizes audio on this device. Short phrases can be misidentified; use a manual speaker if needed. <a href="https://huggingface.co/Xenova/whisper-base">Whisper base</a> uses the Apache 2.0 license. Manual microphone recognition and voice playback depend on your browser and installed languages. Your browser’s speech provider may process microphone audio online. If speech is unavailable, type your phrase instead. Keep the app open during a conversation.</p>
         <p>The app shell is saved for offline opening. Translation also needs the language models to finish downloading and remain in browser storage. Clearing site data removes downloaded models. Translations may make mistakes.</p>
         <p>English ↔ Japanese uses FuguMT: <a href="https://huggingface.co/Kadonox/fugumt-en-ja-onnx">English → Japanese</a> and <a href="https://huggingface.co/Kadonox/fugumt-ja-en-onnx">Japanese → English</a>, licensed under <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>. Kadonox provides the ONNX exports of <a href="https://huggingface.co/staka/fugumt-en-ja">staka’s</a> <a href="https://huggingface.co/staka/fugumt-ja-en">FuguMT models</a>, trained on <a href="https://www.kecl.ntt.co.jp/icl/lirg/jparacrawl/">JParaCrawl</a>. Other pairs use <a href="https://huggingface.co/Xenova/nllb-200-distilled-600M">NLLB-200</a>, licensed under <a href="https://creativecommons.org/licenses/by-nc/4.0/">CC BY-NC 4.0</a>. Browser inference uses <a href="https://github.com/huggingface/transformers.js">Transformers.js</a>.</p>
         <p><a href="privacy.html">Privacy details</a> · <a href="https://github.com/Erendragneel/voice-bridge-app">Source &amp; Android download</a></p>

@@ -3,6 +3,7 @@ const emit=(name,detail)=>window.dispatchEvent(new CustomEvent(name,{detail}));
 const event=(id,type,extra={})=>emit('voice-bridge',{id,type,...extra});
 const modelEvent=(id,type,text='',extra={})=>emit('voice-bridge-model',{id,type,text,...extra});
 const Recognition=window.SpeechRecognition||window.webkitSpeechRecognition;
+let audioContext;
 let capture,autoMode=false,detectSequence=0,detectPending=null;
 let worker,source,target,recognition,utterance,attempt=0,activeSession=-1,activeRequest=-1;
 function engine(){
@@ -13,17 +14,17 @@ function engine(){
  }
  return worker;
 }
-function closeTranslation(){worker?.terminate();worker=null;activeRequest=-1;}
-function stopListening(){attempt++;clearTimeout(detectPending?.timer);detectPending=null;if(capture){capture.node.port.postMessage({enabled:false});capture.stream.getTracks().forEach(t=>t.stop());capture.node.disconnect();capture.input.disconnect();void capture.context.close();capture=null;}if(recognition){recognition.onend=null;recognition.abort();recognition=null;}}
+function closeTranslation(){if(audioContext){void audioContext.close().catch(()=>{});audioContext=null;}worker?.terminate();worker=null;activeRequest=-1;}
+function stopListening(){attempt++;clearTimeout(detectPending?.timer);detectPending=null;if(capture){capture.node.port.postMessage({enabled:false});capture.stream.getTracks().forEach(t=>t.stop());capture.node.disconnect();capture.input.disconnect();capture=null;}if(recognition){recognition.onend=null;recognition.abort();recognition=null;}}
 function stopSpeech(){utterance=null;window.speechSynthesis?.cancel();}
 const bridge={
- browser:true,speechAvailable:!!Recognition,autoAvailable:!!navigator.mediaDevices?.getUserMedia&&!!window.AudioWorkletNode,setAuto(value){autoMode=value;},
+ browser:true,speechAvailable:!!Recognition,autoAvailable:!!navigator.mediaDevices?.getUserMedia&&!!window.AudioWorkletNode,setAuto(value){autoMode=value;if(value&&bridge.autoAvailable){try{audioContext||=new (window.AudioContext||window.webkitAudioContext)();void audioContext.resume().catch(()=>{});}catch{}}},
  prepare(from,to,id,session){source=from;target=to;activeSession=session;activeRequest=id;engine().postMessage({id,action:'prepare',source:from,target:to,auto:autoMode});void navigator.storage?.persist?.().catch(()=>{});},
  translate(text,from,id){activeRequest=id;engine().postMessage({id,action:'translate',text,source:from,target:from===source?target:source});},
  closeTranslation,
  start(language,id){
   stopListening();activeSession=id;
-  if(language==='auto'){void startAuto(id,attempt);return;}
+  if(language==='auto'||language==='ja-JP'){void startAuto(id,attempt,language==='ja-JP'?'ja':undefined);return;}
   if(!Recognition){event(id,'error',{message:'Speech is unavailable. Open this app in Chrome or use Type a phrase.'});return;}
   const rec=new Recognition(),token=attempt;recognition=rec;
   rec.lang=language;rec.continuous=false;rec.interimResults=true;
@@ -58,14 +59,14 @@ const bridge={
 window.VoiceBridgeAndroid=bridge;
 window.speechSynthesis?.getVoices();
 
-async function startAuto(id,token){
+async function startAuto(id,token,language){
  let stream,context;const valid=()=>token===attempt&&id===activeSession;
  try{
   stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}});
   if(!valid()){stream.getTracks().forEach(t=>t.stop());return;}
-  context=new (window.AudioContext||window.webkitAudioContext)();
-  await context.audioWorklet.addModule(new URL('./conversation-capture.js',import.meta.url));await context.resume();
-  if(!valid()){stream.getTracks().forEach(t=>t.stop());await context.close();return;}
+  context=audioContext||=new (window.AudioContext||window.webkitAudioContext)();
+  if(!context.captureLoaded){await context.audioWorklet.addModule(new URL('./conversation-capture.js',import.meta.url));context.captureLoaded=true;}await context.resume();
+  if(!valid()){stream.getTracks().forEach(t=>t.stop());if(context!==audioContext)await context.close();return;}
   const input=context.createMediaStreamSource(stream),node=new AudioWorkletNode(context,'conversation-capture');
   capture={stream,context,input,node};input.connect(node);node.connect(context.destination);
   node.port.onmessage=({data})=>{
@@ -77,9 +78,9 @@ async function startAuto(id,token){
     const audio=new Float32Array(Math.round(data.audio.length*16000/data.rate));
     for(let i=0;i<audio.length;i++){const at=i*data.rate/16000,left=Math.floor(at),f=at-left;audio[i]=data.audio[left]*(1-f)+(data.audio[Math.min(left+1,data.audio.length-1)]||0)*f;}
     stopListening();const request=--detectSequence;detectPending={request,session:id,token:attempt,timer:setTimeout(()=>{if(detectPending?.request===request)event(id,'error',{message:'Auto recognition timed out. Try a shorter phrase or a manual speaker.'});},300000)};
-    event(id,'recognizing');engine().postMessage({id:request,action:'detect',audio},[audio.buffer]);
+    event(id,'recognizing');engine().postMessage({id:request,action:'detect',source:language,audio},[audio.buffer]);
    }
   };
   node.port.postMessage({enabled:true});event(id,'ready');
- }catch(error){stream?.getTracks().forEach(t=>t.stop());if(context&&context!==capture?.context)void context.close();if(valid())event(id,'error',{message:error.name==='NotAllowedError'?'Allow microphone permission to use Auto, or type a phrase below.':'Auto could not open the microphone. Try a manual speaker or type a phrase.'});}
+ }catch(error){stream?.getTracks().forEach(t=>t.stop());if(context&&context!==audioContext)void context.close();if(valid())event(id,'error',{message:error.name==='NotAllowedError'?'Allow microphone permission to use Auto, or type a phrase below.':'Auto could not open the microphone. Try a manual speaker or type a phrase.'});}
 }

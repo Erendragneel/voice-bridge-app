@@ -77,7 +77,8 @@ syncInstall();
 
 if ('serviceWorker' in navigator && window.isSecureContext) {
   try {
-    await navigator.serviceWorker.register('./sw.js', {scope: './'});
+    const registration=await navigator.serviceWorker.register('./sw.js', {scope: './',updateViaCache:'none'});
+    void registration.update();
     await navigator.serviceWorker.ready;
     $('offline-status').textContent = 'App ready for offline opening · translation needs downloaded models';
   } catch {
@@ -86,3 +87,4 @@ if ('serviceWorker' in navigator && window.isSecureContext) {
 } else {
   $('offline-status').textContent = 'Open the official secure website to install and enable offline opening.';
 }
+

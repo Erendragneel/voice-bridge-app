@@ -19,3 +19,5 @@ Native Android translation uses Google ML Kit on-device. According to [Google's 
 Microphone capture and voice playback stop when the conversation stops or the app leaves the foreground. Android backup is disabled. The app explicitly requests microphone and internet permissions; library dependencies may add network-state permissions used for downloads.
 
 Auto English/Japanese speech recognition uses a downloaded Whisper model on this device. Auto microphone audio is not sent to a speech provider. Manual speaker mode retains the browser speech service described above.
+
+The GitHub web app also recognizes manual Japanese speech locally through Whisper. Manual English and other language buttons use browser speech recognition.

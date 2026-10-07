@@ -32,8 +32,9 @@ async function run({id,action,source,target,text,audio,auto}){
   if(action==='detect'){
    const r=await load(id,'Xenova/whisper-base');send(id,'progress',{message:'Detecting English or Japanese…'});
    const features=await r.processor(audio);
-   const detected=await r.model.generate({inputs:features.input_features,decoder_input_ids:[r.model.generation_config.decoder_start_token_id],max_new_tokens:1,suppress_tokens:[],begin_suppress_tokens:[],forced_decoder_ids:null});
-   const language=r.tokenizer.decode(detected[0].tolist(),{skip_special_tokens:false}).match(/<\|([a-z]{2})\|>/)?.[1];
+   let language=source;
+   if(!language){const detected=await r.model.generate({inputs:features.input_features,decoder_input_ids:[r.model.generation_config.decoder_start_token_id],max_new_tokens:1,suppress_tokens:[],begin_suppress_tokens:[],forced_decoder_ids:null});
+   language=r.tokenizer.decode(detected[0].tolist(),{skip_special_tokens:false}).match(/<\|([a-z]{2})\|>/)?.[1];}
    if(!['en','ja'].includes(language)){send(id,'recognized',{original:'',language});return;}
    const out=await r.model.generate({inputs:features.input_features,language:language==='ja'?'japanese':'english',task:'transcribe',return_timestamps:false,max_new_tokens:160});
    send(id,'recognized',{original:r.tokenizer.decode(out[0].tolist(),{skip_special_tokens:true}).trim(),language});return;
