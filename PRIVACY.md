@@ -18,6 +18,8 @@ Native Android translation uses Google ML Kit on-device. According to [Google's 
 
 Microphone capture and voice playback stop when the conversation stops or the app leaves the foreground. Android backup is disabled. The app explicitly requests microphone and internet permissions; library dependencies may add network-state permissions used for downloads.
 
-Auto English/Japanese speech recognition uses a downloaded Whisper model on this device. Auto microphone audio is not sent to a speech provider. Manual speaker mode retains the browser speech service described above.
+In the browser/home-screen edition, Auto English/Japanese speech recognition uses a downloaded Whisper model on this device. Auto microphone audio is not sent to a speech provider. Manual speaker mode retains the browser speech service described above.
 
-The Japanese speaker button defaults to Faster browser speech, which may send audio to the browser speech provider. Select On-device Japanese for local recognition. If Faster Japanese fails, the app switches to local Whisper recognition and asks you to repeat the phrase. Auto remains local. Manual English and other language buttons use browser speech recognition.
+In the browser/home-screen edition, the Japanese speaker button defaults to Faster browser speech, which may send audio to the browser speech provider. Select On-device Japanese for local recognition. If Faster Japanese fails, the app switches to local Whisper recognition and asks you to repeat the phrase. Auto remains local. Manual English and other language buttons use browser speech recognition.
+
+In Android v1.1.0, Auto uses the phone’s Android speech service, with the same provider privacy implications as manual native speech. It does not use Whisper. Auto availability depends on Android version and speech-service support. Successful browser workers can retain recent translation text in memory across Stop/Start to avoid reloading models; closing the app ends that worker. No conversation history is written to persistent storage by the app.

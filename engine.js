@@ -1,7 +1,7 @@
 let requestSequence = 0;
 export class TranslationEngine {
  constructor() {
-  this.pending = new Map(); this.bridge = window.VoiceBridgeAndroid;
+  this.failed=false; this.pending = new Map(); this.bridge = window.VoiceBridgeAndroid;
   this.listener = ({detail:e}) => {
    const pending = this.pending.get(e.id);
    if (!pending) return;
@@ -11,7 +11,7 @@ export class TranslationEngine {
     pending.progress?.({message:e.text, progress:e.progress}); return;
    }
    clearTimeout(pending.timer); this.pending.delete(e.id);
-   if (e.type === 'error') pending.reject(Error(e.text));
+   if (e.type === 'error') {this.failed=true;pending.reject(Error(e.text));}
    else pending.resolve(e.type === 'translated' ? {translation:e.text} : {});
   };
   window.addEventListener('voice-bridge-model', this.listener);
@@ -19,7 +19,7 @@ export class TranslationEngine {
  timeout(id) {
   const pending = this.pending.get(id);
   if (!pending) return;
-  this.pending.delete(id);
+  this.pending.delete(id);this.failed=true;
   pending.reject(Error('The language pack did not respond. Connect to Wi-Fi, check free storage, then retry.'));
  }
  run(action, data, progress) {
@@ -37,7 +37,7 @@ export class TranslationEngine {
   });
  }
  close() {
-  window.removeEventListener('voice-bridge-model', this.listener); this.bridge?.closeTranslation();
+  window.removeEventListener('voice-bridge-model', this.listener); if(this.bridge?.browser)this.bridge.closeTranslation(this.pending.size===0&&!this.failed);else this.bridge?.closeTranslation();
   for (const pending of this.pending.values()) {clearTimeout(pending.timer);pending.reject(Error('Stopped'));}
   this.pending.clear();
  }

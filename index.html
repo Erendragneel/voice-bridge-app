@@ -37,16 +37,17 @@
       <div id="status" role="status">Ready · select Auto, English, or 日本語</div>
       <div class="meter"><meter id="level" min="0" max="10" value="0" aria-label="Microphone sound level"></meter><span>Microphone level</span></div>
       <div class="exchange" aria-live="polite">
-        <article><span id="original-label">ORIGINAL</span><p id="original">Speak or type a phrase. Your words appear here.</p></article>
+        <article><span id="original-label">ORIGINAL</span><p id="original">Speak or type a phrase. Your words appear here.</p><button id="correct-text" class="secondary" type="button" hidden>Correct recognized words</button></article>
         <article class="translated"><span id="translation-label">TRANSLATION</span><p id="translation">Each exchange appears here automatically.</p></article>
       </div>
+      <p id="translation-time" class="hint" role="status"></p>
       <div id="progress" hidden><span id="progress-text"></span><progress id="download" max="100" value="0" hidden></progress></div>
       <p id="error" role="alert" hidden></p>
       <label class="auto"><input id="auto-read" type="checkbox" checked> Read translations aloud automatically</label>
       <button id="start" class="primary" type="button">Start conversation</button>
       <button id="finish" class="secondary" type="button" hidden>Finish this phrase</button>
       <p class="hint">Auto detects each phrase’s language. English and 日本語 stay selected until you change them. Wait for “Listening” before speaking.</p>
-      <details class="typed-entry" open>
+      <details id="typed-entry" class="typed-entry" open>
         <summary>Type a phrase</summary>
         <label for="typed-text">Words from the selected speaker</label>
         <div class="typed-controls"><textarea id="typed-text" rows="2" maxlength="4000" placeholder="Type what you want to say…"></textarea><button id="translate-text" class="secondary" type="button">Translate text</button></div>

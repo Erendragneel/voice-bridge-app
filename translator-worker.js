@@ -41,7 +41,7 @@ async function run({id,action,source,target,text,audio,auto}){
    language=r.tokenizer.decode(detected[0].tolist(),{skip_special_tokens:false}).match(/<\|([a-z]{2})\|>/)?.[1];}
    if(!['en','ja'].includes(language)){send(id,'recognized',{original:'',language});return;}
    const out=await r.model.generate({inputs:features.input_features,language:language==='ja'?'japanese':'english',task:'transcribe',return_timestamps:false,max_new_tokens:160});
-   send(id,'recognized',{original:r.tokenizer.decode(out[0].tolist(),{skip_special_tokens:true}).trim(),language});return;
+   let original=r.tokenizer.decode(out[0].tolist(),{skip_special_tokens:true}).trim();if(/^\s*[[(].*[\])]\s*$/.test(original)||invalidTranslation(original,''))original='';send(id,'recognized',{original,language});return;
   }
   if(!codes[source]||!codes[target])throw Error('Choose a supported language.');
   if(action==='prepare'){for(const model of new Set([select(source,target),select(target,source)]))await load(id,model);if(auto)await load(id,'Xenova/whisper-base');send(id,'result');return;}

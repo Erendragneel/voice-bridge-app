@@ -14,7 +14,7 @@ function engine(){
  }
  return worker;
 }
-function closeTranslation(){if(audioContext){void audioContext.close().catch(()=>{});audioContext=null;}worker?.terminate();worker=null;activeRequest=-1;}
+function closeTranslation(keepWarm=false){if(audioContext){void audioContext.close().catch(()=>{});audioContext=null;}if(!keepWarm){worker?.terminate();worker=null;}activeRequest=-1;}
 function stopListening(){attempt++;clearTimeout(speechTimer);clearTimeout(detectPending?.timer);detectPending=null;if(capture){capture.node.port.postMessage({enabled:false});capture.stream.getTracks().forEach(t=>t.stop());capture.node.disconnect();capture.input.disconnect();capture=null;}if(recognition){recognition.onend=null;recognition.abort();recognition=null;}}
 function stopSpeech(){utterance=null;window.speechSynthesis?.cancel();}
 const bridge={
@@ -35,7 +35,7 @@ const bridge={
   rec.onstart=()=>{if(valid()){clearTimeout(speechTimer);event(id,'ready');}};
   rec.onspeechstart=()=>{if(valid())event(id,'speech');};
   rec.onspeechend=()=>{if(valid()){event(id,'recognizing');if(language==='ja-JP')speechTimer=setTimeout(()=>fallback(),5000);}};
-  rec.onresult=e=>{if(!valid())return;words=Array.from(e.results,r=>r[0].transcript).join(' ').trim();event(id,'partial',{text:words});};
+  rec.onresult=e=>{if(!valid())return;words=Array.from(e.results,r=>r[0].transcript).join(' ').trim();event(id,'partial',{text:words});if(words&&Array.from(e.results).every(r=>r.isFinal===true)){stopListening();emptyJapanese=0;event(id,'result',{text:words});}};
   rec.onerror=e=>{
    if(!valid())return;if(e.error==='no-speech')return;if(language==='ja-JP'&&!['not-allowed','audio-capture','aborted'].includes(e.error)&&fallback(e.error))return;failed=true;clearTimeout(speechTimer);
    event(id,'error',{message:e.error==='not-allowed'||e.error==='service-not-allowed'?'Allow microphone permission in Chrome settings, or type a phrase below.':e.error==='audio-capture'?'No microphone is available. Type a phrase below.':'Speech could not connect. Check your internet connection or type a phrase below.'});
@@ -44,7 +44,7 @@ const bridge={
   try{rec.start();}catch(error){if(fallback(error.name||'startup error'))return;clearTimeout(speechTimer);event(id,'error',{message:'Could not open the microphone. Check permission or type a phrase below.'});}
  },
  stopListening,finish(){if(capture)capture.node.port.postMessage({finish:true});else recognition?.stop();},
- cancel(){japaneseFallback=false;emptyJapanese=0;activeSession=-1;stopListening();stopSpeech();closeTranslation();},
+ cancel(){japaneseFallback=false;emptyJapanese=0;activeSession=-1;stopListening();stopSpeech();closeTranslation(true);},
  stopSpeech,
  read(text,language,id){
   stopListening();stopSpeech();
