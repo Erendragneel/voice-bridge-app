@@ -4,7 +4,7 @@
 
 - **Samsung / Android:** open the link in Chrome, tap **Install App**, then confirm. If the prompt is unavailable, use Chrome’s menu → **Install app** or **Add to Home screen**.
 - **iPhone / iPad:** open in Safari → Share → **Add to Home Screen** → Add.
-- **Prefer the Android APK?** **[Download voice-bridge-1.1.0.apk](https://github.com/Erendragneel/voice-bridge-app/releases/download/v1.1.0/voice-bridge-1.1.0.apk)**, open the downloaded file, and allow installation from your browser when Android prompts. Android 8.0 or newer is required. Version 1.1.0 uses the existing app’s signing certificate so it can update previous native releases.
+- **Prefer the Android APK?** **[Download voice-bridge-1.2.0.apk](https://github.com/Erendragneel/voice-bridge-app/releases/download/v1.2.0/voice-bridge-1.2.0.apk)**, open the downloaded file, and allow installation from your browser when Android prompts. Android 8.0 or newer is required. Version 1.2.0 uses the existing app’s signing certificate so it can update previous native releases.
 
 Choose the two languages and select Auto, English, or Japanese. Tap **Start conversation**, allow microphone access, then speak and pause. Manual speaker selection stays selected until you change it. Auto detects each phrase independently. Wait for **Listening** before replying. Tap **Stop conversation** to finish. You can also expand **Type a phrase** and tap **Translate text**, which works without microphone recognition.
 
@@ -18,7 +18,7 @@ GitHub Pages publishes the main branch from the repository root. All app URLs, t
 
 ## Auto conversation mode
 
-In the GitHub Pages app, select **Auto** for English/Japanese, then **Start conversation**. Each phrase is identified independently, so either person can speak next. Auto recognizes microphone audio locally using an additional Whisper speech pack downloaded on first use. Wait for Listening before the next phrase. Very short phrases may be misidentified; manual speaker buttons remain available. This feature is in the website/home-screen app; the v1.1.0 Android APK adds native Auto on Android 14+ with a compatible speech service and both language packs. If detection or switching fails, choose a manual speaker.
+In the GitHub Pages app, select **Auto** for English/Japanese, then **Start conversation**. Each phrase is identified independently, so either person can speak next. Auto recognizes microphone audio locally using an additional Whisper speech pack downloaded on first use. Wait for Listening before the next phrase. Very short phrases may be misidentified; manual speaker buttons remain available. This feature is in the website/home-screen app; the v1.2.0 Android APK adds native Auto on Android 14+ with a compatible speech service and both language packs. If detection or switching fails, choose a manual speaker.
 
 Speaker buttons remain clickable during preparation, translation, and playback. Selecting a different speaker during playback stops that playback and opens the chosen microphone. Japanese speech offers Faster browser service or On-device Whisper recognition. Updated app windows reload automatically once to avoid mixing cached scripts from different versions.
 
@@ -28,4 +28,6 @@ Japanese speech defaults to **Faster · browser service**. If recognition fails,
 
 GPU translation is disabled following repeated-word corruption. Broken repetitive output is retried using a fresh CPU model, and persistent failure is rejected before playback and caching.
 
-Version 1.1.0: native Android retains warmed ML Kit clients between conversations, adds processing time and Correct recognized words, and blocks empty/repetitive translation output before speaking. The website reuses successful warmed workers and translates final browser transcripts immediately. Processing time starts after the phrase ends; it excludes model preparation and spoken playback. Native speech service performance must still be checked on your phone.
+Version 1.2.0: native Android retains warmed ML Kit clients between conversations, adds processing time and Correct recognized words, and blocks empty/repetitive translation output before speaking. The website reuses successful warmed workers and translates final browser transcripts immediately. Processing time starts after the phrase ends; it excludes model preparation and spoken playback. Native speech service performance must still be checked on your phone.
+
+Native Android v1.2.0 pauses uncertain speech for correction when the service supplies a low confidence score, bounds microphone startup and final-result waits, and reuses recent validated exact translations from a 64-entry memory cache. Cache clears when the language pair changes or the app leaves the foreground. The timing display separates speech processing from translation. The app remains free, without paid APIs, subscriptions or billing setup.
