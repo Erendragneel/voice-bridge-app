@@ -1,6 +1,6 @@
 /* Voice Bridge's own shell. Translation models use the runtime's browser cache. */
 const CACHE_PREFIX = 'voice-bridge-app-pwa-';
-const SHELL_CACHE = CACHE_PREFIX + 'shell-dd66ea944a24';
+const SHELL_CACHE = CACHE_PREFIX + 'shell-8f05f6424b41';
 const SHELL = [
   './', './index.html', './app.css', './app.js', './engine.js',
   './conversation-capture.js', './browser-bridge.js', './translator-worker.js', './install.js',
@@ -18,7 +18,8 @@ self.addEventListener('activate', event => {
     await Promise.all(old.map(key=>caches.delete(key)));await self.clients.claim();
     // Older app versions have no update listener. Reload their windows once so
     // the new HTML and scripts are loaded together from this complete cache.
-    if(old.length){for(const client of await self.clients.matchAll({type:'window'})){if(client.url.startsWith(self.registration.scope))await client.navigate(client.url).catch(()=>{});}}
+    // Do not await navigation here: controlled loads must wait for activation.
+    if(old.length){for(const client of await self.clients.matchAll({type:'window'})){if(client.url.startsWith(self.registration.scope))void client.navigate(client.url).catch(()=>{});}}
   })());
 });
 self.addEventListener('fetch', event => {
