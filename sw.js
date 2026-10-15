@@ -1,10 +1,10 @@
 /* Voice Bridge's own shell. Translation models use the runtime's browser cache. */
 const CACHE_PREFIX = 'voice-bridge-app-pwa-';
-const SHELL_CACHE = CACHE_PREFIX + 'shell-8f05f6424b41';
+const SHELL_CACHE = CACHE_PREFIX + 'shell-4f4b3a0f9fda';
 const SHELL = [
   './', './index.html', './app.css', './app.js', './engine.js',
   './conversation-capture.js', './browser-bridge.js', './translator-worker.js', './install.js',
-  './manifest.webmanifest', './privacy.html',
+  './manifest.webmanifest', './voice-bridge.webmanifest', './privacy.html',
   './icons/icon-192.png', './icons/icon-512.png', './icons/icon-maskable-512.png',
   './vendor/transformers.min.js', './vendor/ort-wasm-simd-threaded.jsep.mjs',
   './vendor/ort-wasm-simd-threaded.jsep.wasm'
